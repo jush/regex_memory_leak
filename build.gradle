@@ -1,0 +1,35 @@
+plugins {
+    id "org.jetbrains.kotlin.multiplatform" version "1.3.11"
+}
+repositories {
+    mavenCentral()
+}
+kotlin {
+    targets {
+        fromPreset(presets.macosX64, 'macos')
+
+        configure([macos]) {
+            compilations.main.outputKinds('EXECUTABLE')
+            compilations.main.entryPoint = 'main'
+        }
+    }
+    sourceSets {
+        macosMain {
+          kotlin.srcDir('src/nativeMain/kotlin')
+        }
+        macosTest {
+        }
+    }
+}
+
+task runProgram {
+    def buildType = 'release'
+    dependsOn "link${buildType.capitalize()}ExecutableMacos"
+    doLast {
+        def programFile = kotlin.targets.macos.compilations.main.getBinary('EXECUTABLE', buildType)
+        exec {
+            executable programFile
+            args ''
+        }
+    }
+}
